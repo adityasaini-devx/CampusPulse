@@ -99,55 +99,10 @@ Administrators can:
 - Analyze issue patterns
 - Prioritize complaints
 - Assign / forward complaints
-- Track resolution
+- Track resolutions
 - Monitor maintenance issues
 
 ---
-
-# 🧠 Machine Learning Approach
-
-## 1. Dataset & Data Understanding
-
-The complaint dataset contains information such as:
-
-- Issue category
-- Location
-- Severity
-- Number of affected users
-- Issue duration
-- Previous similar complaints
-- Complaint frequency
-- Priority
-
-The dataset is analyzed to understand:
-
-- Feature distributions
-- Relationships between variables
-- Data quality
-- Missing values
-- Relevant patterns
-
----
-
-## 2. Data Preprocessing & Feature Engineering
-
-The preprocessing pipeline includes:
-
-- Handling missing values
-- Encoding categorical variables
-- Scaling numerical features where required
-- Feature selection
-- Historical feature creation
-- Train-test splitting
-
----
-
-## 3. Complaint Priority Classification
-
-The system performs **multi-class classification** to predict:
-
-```text
-Low
-Medium
-High
-Critical
+# Frontend and UI Approach
+As the frontend developer and UI designer, I created the visual and interactive bridge between the complex machine learning backend and our diverse end-users.
+Utilizing Google Stitch for UI design alongside HTML, CSS, and JavaScript/React for frontend development. 
