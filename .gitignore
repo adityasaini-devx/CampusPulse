@@ -6,4 +6,6 @@ __pycache__/
 
 # Environment
 .env
-04_classification.ipynb
+
+data/processed/*.csv
+
