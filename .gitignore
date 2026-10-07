@@ -9,3 +9,6 @@ __pycache__/
 
 data/processed/*.csv
 
+
+data/cleaned/*.csv
+data/processed/*.csv
