@@ -1,9 +1,4 @@
-"""CampusPulse preprocessing pipeline.
-
-Creates the exact feature set used by the classification notebook, fits the
-preprocessor and PCA on the training split, and saves both artifacts.
-"""
-
+"""CampusPulse preprocessing pipeline."""
 import sys
 from pathlib import Path
 
