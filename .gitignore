@@ -1,11 +1,9 @@
-# Python
-__pycache__/
-*.pyc
 .venv/
-venv/
-
-# Jupyter
+__pycache__/
 .ipynb_checkpoints/
+*.pyc
+
 
 # Environment
 .env
+04_classification.ipynb
