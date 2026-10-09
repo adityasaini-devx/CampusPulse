@@ -1336,3 +1336,36 @@ td small {
   font-weight: 700;
   white-space: nowrap;
 }
+
+/* ==============================
+   SIGN UP
+================================ */
+
+.login-form-area {
+  position: relative;
+}
+
+.signup-top-button {
+  position: absolute;
+  top: 25px;
+  right: 30px;
+
+  padding: 9px 16px;
+
+  border: 1px solid var(--green);
+  border-radius: 9px;
+
+  color: var(--green);
+  background: white;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  transition: all 0.2s ease;
+}
+
+.signup-top-button:hover {
+  background: var(--green);
+  color: white;
+  transform: translateY(-2px);
+}

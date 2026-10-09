@@ -1,5 +1,8 @@
+import React from "react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+//import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { apiRequest } from "../api";
 
 function Login() {
   const navigate = useNavigate();
@@ -8,42 +11,77 @@ function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  function handleLogin(event) {
-    event.preventDefault();
+  
+async function handleLogin(event) {
+  event.preventDefault();
+  setError("");
 
-    setError("");
+  try {
+    const data = await apiRequest("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
 
-    // =========================
-    // ADMIN LOGIN
-    // =========================
-    if (
-      email === "admin@campus.edu" &&
-      password === "admin@123"
-    ) {
-      localStorage.setItem("campusRole", "admin");
+    localStorage.setItem("campusToken", data.token);
+    localStorage.setItem("campusRole", data.user.role);
+    localStorage.setItem("campusUser", JSON.stringify(data.user));
 
+    if (data.user.role === "admin") {
       navigate("/dashboard");
-      return;
-    }
-
-    // =========================
-    // FACULTY LOGIN
-    // =========================
-    if (
-      email === "faculty@campus.edu" &&
-      password === "faculty@123"
-    ) {
-      localStorage.setItem("campusRole", "faculty");
-
+    } else {
       navigate("/analytics");
-      return;
     }
-
-    // =========================
-    // WRONG LOGIN
-    // =========================
-    setError("Invalid email or password.");
+  } catch (error) {
+    setError(error.message);
   }
+}
+  // ADMIN LOGIN
+  if (
+    email === "admin@campus.edu" &&
+    password === "admin123"
+  ) {
+    localStorage.setItem("campusRole", "admin");
+
+    navigate("/dashboard");
+    return;
+  }
+
+  // DEFAULT FACULTY LOGIN
+  if (
+    email === "faculty@campus.edu" &&
+    password === "faculty123"
+  ) {
+    localStorage.setItem("campusRole", "faculty");
+
+    navigate("/analytics");
+    return;
+  }
+
+  // REGISTERED USERS
+  const users =
+    JSON.parse(localStorage.getItem("campusUsers")) || [];
+
+  const user = users.find(
+    (item) =>
+      item.email.toLowerCase() ===
+        email.toLowerCase() &&
+      item.password === password
+  );
+
+  if (user) {
+    localStorage.setItem("campusRole", "faculty");
+    localStorage.setItem(
+      "campusUser",
+      JSON.stringify(user)
+    );
+
+    navigate("/analytics");
+    return;
+  }
+
+  // WRONG LOGIN
+  setError("Invalid email or password.");
+}
 
   return (
     <main className="login-page">
@@ -93,6 +131,12 @@ function Login() {
 
       {/* RIGHT SIDE */}
       <section className="login-form-area">
+        <Link
+          to="/signup"
+          className="signup-top-button"
+        >
+          Sign Up
+        </Link>
 
         <div className="login-form">
 
@@ -193,6 +237,6 @@ function Login() {
 
     </main>
   );
-}
+
 
 export default Login;

@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import Analytics from "./pages/Analytics";
 import Complaint from "./pages/Complaint";
@@ -49,6 +50,10 @@ function App() {
         element={<Login />}
       />
 
+      <Route
+        path="/signup"
+        element={<Signup />}
+      />
       {/* ADMIN ONLY */}
       <Route
         path="/dashboard"
