@@ -292,6 +292,6 @@ async function handleSignup(event) {
 
     </main>
   );
-}
+
 
 export default Signup;
