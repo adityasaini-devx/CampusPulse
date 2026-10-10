@@ -118,4 +118,29 @@ async function me(req, res) {
     });
 }
 
-module.exports = { login, register, me };
+// Faculty signup used by the CampusPulse signup form.
+async function signup(req, res, next) {
+    try {
+        const { department } = req.body || {};
+
+        if (!department || !String(department).trim()) {
+            return res.status(400).json({
+                success: false,
+                message: "Department is required"
+            });
+        }
+
+        // Public signup is faculty-only; users cannot grant themselves admin access.
+        req.body = {
+            ...req.body,
+            role: "faculty",
+            department: String(department).trim()
+        };
+
+        return register(req, res, next);
+    } catch (error) {
+        next(error);
+    }
+}
+
+module.exports = { login, register, signup, me };
