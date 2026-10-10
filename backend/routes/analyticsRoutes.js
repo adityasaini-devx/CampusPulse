@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const {
     overview,
+    monthlyTrend,
     categoryDistribution,
     weekly,
     facultyActivity
@@ -13,6 +14,7 @@ router.use(allowRoles("admin", "faculty"));
 
 // Analytics routes
 router.get("/overview", overview);
+router.get("/monthly", monthlyTrend);
 router.get("/category-distribution", categoryDistribution);
 router.get("/weekly", weekly);
 router.get("/faculty", facultyActivity);

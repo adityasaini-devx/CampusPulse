@@ -16,12 +16,36 @@ function getComplaintLookupQuery(id) {
     return isObjectId ? { _id: normalized } : { ticketId: normalized };
 }
 
+function getComplaintAccessFilter(user) {
+    if (user.role === "admin") {
+        return {};
+    }
+
+    if (user.role === "faculty") {
+        return { assignedTo: user._id };
+    }
+
+    if (user.role === "student") {
+        return { createdBy: user._id };
+    }
+
+    return { _id: null };
+}
+
+function getAuthorizedComplaintQuery(id, user) {
+    const lookup = getComplaintLookupQuery(id);
+    const access = getComplaintAccessFilter(user);
+
+    return Object.keys(access).length
+        ? { $and: [lookup, access] }
+        : lookup;
+}
+
 // Create a complaint
 async function createComplaint(req, res, next) {
     try {
         const {
             title,
-            userType = "Student",
             category,
             building,
             room,
@@ -30,8 +54,11 @@ async function createComplaint(req, res, next) {
             issueDuration,
             description
         } = req.body;
+        const userType = req.user.role === "faculty" ? "Teacher" : "Student";
 
-        const photoUrl = req.file ? `/uploads/${req.file.filename}` : "";
+        const photoUrl = req.file?.path?.startsWith("https://")
+            ? req.file.path
+            : (req.file ? `/uploads/${req.file.filename}` : "");
 
         if (
             !title || !category || !building || !room ||
@@ -108,7 +135,12 @@ async function getComplaints(req, res, next) {
         if (category) filter.category = category;
         if (priority) filter.priority = priority;
 
-        if (mine === "true" && req.user?._id) {
+        const accessFilter = getComplaintAccessFilter(req.user);
+        if (Object.keys(accessFilter).length) {
+            Object.assign(filter, accessFilter);
+        }
+
+        if (mine === "true" && req.user?.role === "admin") {
             filter.createdBy = req.user._id;
         }
 
@@ -143,7 +175,9 @@ async function getComplaints(req, res, next) {
 // Get one complaint
 async function getComplaintById(req, res, next) {
     try {
-        const complaint = await Complaint.findOne(getComplaintLookupQuery(req.params.id))
+        const complaint = await Complaint.findOne(
+            getAuthorizedComplaintQuery(req.params.id, req.user)
+        )
             .populate("createdBy", "name email role")
             .populate("assignedTo", "name email role department");
 
@@ -178,6 +212,13 @@ async function updateComplaint(req, res, next) {
             }
         }
 
+        if (updates.status === "Resolved" && req.user.role !== "admin") {
+            return res.status(403).json({
+                success: false,
+                message: "Only admins can resolve complaints"
+            });
+        }
+
         if (updates.assignedTo) {
             const faculty = await User.findOne({
                 _id: updates.assignedTo,
@@ -197,7 +238,7 @@ async function updateComplaint(req, res, next) {
         }
 
         const complaint = await Complaint.findOneAndUpdate(
-            getComplaintLookupQuery(req.params.id),
+            getAuthorizedComplaintQuery(req.params.id, req.user),
             updates,
             { new: true, runValidators: true }
         );
@@ -245,7 +286,7 @@ async function deleteComplaint(req, res, next) {
 // Check for similar complaints
 async function checkDuplicate(req, res, next) {
     try {
-        const { title = "", description = "" } = req.body;
+        const { title = "", description = "" } = req.body || req.query || {};
         const text = `${title} ${description}`.toLowerCase().trim();
 
         if (!text) {
@@ -263,13 +304,19 @@ async function checkDuplicate(req, res, next) {
 
         const regex = new RegExp(words.join("|"), "i");
 
-        const matches = await Complaint.find({
+        const duplicateFilter = {
             status: { $ne: "Resolved" },
             $or: [
                 { title: regex },
                 { description: regex }
             ]
-        })
+        };
+        const accessFilter = getComplaintAccessFilter(req.user);
+        const query = Object.keys(accessFilter).length
+            ? { $and: [duplicateFilter, accessFilter] }
+            : duplicateFilter;
+
+        const matches = await Complaint.find(query)
             .sort({ createdAt: -1 })
             .limit(5)
             .select("ticketId title category building room status priority");

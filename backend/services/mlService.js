@@ -1,8 +1,12 @@
-const ML_SERVICE_URL =
-    process.env.ML_SERVICE_URL || "http://localhost:8000";
+const configuredMLServiceUrl = process.env.ML_SERVICE_URL?.trim();
+const ML_SERVICE_URL = (
+    configuredMLServiceUrl || "http://localhost:8000"
+).replace(/\/+$/, "");
 
 const ML_ENABLED =
     String(process.env.ML_ENABLED).toLowerCase() === "true";
+const ML_REQUEST_TIMEOUT_MS = 5000;
+const VALID_PRIORITIES = new Set(["Low", "Medium", "High", "Critical"]);
 
 // Convert complaint details to the values used by the ML service
 function convertAffectedUsers(value) {
@@ -96,6 +100,12 @@ async function predictComplaint(complaint) {
         description: String(complaint.description || "")
     };
 
+    const controller = new AbortController();
+    const timeout = setTimeout(
+        () => controller.abort(),
+        ML_REQUEST_TIMEOUT_MS
+    );
+
     try {
         console.log("Sending complaint to ML service:", payload);
 
@@ -104,28 +114,51 @@ async function predictComplaint(complaint) {
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(payload),
+            signal: controller.signal
         });
 
-        const data = await response.json().catch(() => ({}));
+        let data;
+        try {
+            data = await response.json();
+        } catch (error) {
+            throw new Error(
+                `ML service returned invalid JSON (${response.status})`,
+                { cause: error }
+            );
+        }
 
         if (!response.ok) {
             console.error("ML service error:", data);
+            const detail = data && typeof data === "object" && !Array.isArray(data)
+                ? data.detail || data.message
+                : null;
             throw new Error(
-                data.detail || data.message || `ML service request failed (${response.status})`
+                detail || `ML service request failed (${response.status})`
             );
+        }
+
+        if (!data || typeof data !== "object" || Array.isArray(data)) {
+            throw new Error("ML service returned an invalid response object");
         }
 
         console.log("ML response:", data);
 
         const priorityDetails = data.priority;
-        const priority =
+        const priorityCandidate =
             typeof priorityDetails === "string"
                 ? priorityDetails
                 : priorityDetails?.predicted_priority ||
                     priorityDetails?.value ||
-                    data.predicted_priority ||
-                    null;
+                    data.predicted_priority;
+
+        if (
+            typeof priorityCandidate !== "string" ||
+            !VALID_PRIORITIES.has(priorityCandidate.trim())
+        ) {
+            throw new Error("ML service response is missing a valid priority");
+        }
+        const priority = priorityCandidate.trim();
 
         const model =
             typeof priorityDetails === "string"
@@ -162,13 +195,18 @@ async function predictComplaint(complaint) {
             featureSource: data.feature_source || "historical_dataset"
         };
     } catch (error) {
-        console.error("ML service connection failed:", error.message);
+        const message = controller.signal.aborted
+            ? `ML service request timed out after ${ML_REQUEST_TIMEOUT_MS} ms`
+            : error.message;
+        console.error("ML service request failed:", message);
 
         return {
             enabled: false,
-            error: error.message,
+            error: message,
             message: "ML service unavailable. Complaint can still be stored."
         };
+    } finally {
+        clearTimeout(timeout);
     }
 }
 

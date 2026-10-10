@@ -4,12 +4,16 @@ const User = require("../models/User");
 // Get the main complaint stats
 async function overview(req, res, next) {
     try {
+        const recentFilter = req.user?.role === "faculty"
+            ? { assignedTo: req.user._id }
+            : {};
         const [
             total,
             active,
             critical,
             resolved,
-            recent
+            recent,
+            resolutionTime
         ] = await Promise.all([
             Complaint.countDocuments(),
             Complaint.countDocuments({
@@ -17,7 +21,29 @@ async function overview(req, res, next) {
             }),
             Complaint.countDocuments({ priority: "Critical", status: { $ne: "Resolved" } }),
             Complaint.countDocuments({ status: "Resolved" }),
-            Complaint.find().sort({ createdAt: -1 }).limit(5)
+            Complaint.find(recentFilter).sort({ createdAt: -1 }).limit(5),
+            Complaint.aggregate([
+                {
+                    $match: {
+                        status: "Resolved",
+                        createdAt: { $type: "date" },
+                        resolvedAt: { $type: "date" }
+                    }
+                },
+                {
+                    $group: {
+                        _id: null,
+                        averageHours: {
+                            $avg: {
+                                $divide: [
+                                    { $subtract: ["$resolvedAt", "$createdAt"] },
+                                    3600000
+                                ]
+                            }
+                        }
+                    }
+                }
+            ])
         ]);
 
         const resolutionRate = total
@@ -31,10 +57,63 @@ async function overview(req, res, next) {
                 active,
                 critical,
                 resolved,
-                resolutionRate
+                resolutionRate,
+                averageResolutionTimeHours: Number(
+                    (resolutionTime[0]?.averageHours || 0).toFixed(2)
+                )
             },
             recent
         });
+    } catch (error) {
+        next(error);
+    }
+}
+
+// Get complaint counts for each of the last twelve calendar months
+async function monthlyTrend(req, res, next) {
+    try {
+        const now = new Date();
+        const start = new Date(Date.UTC(
+            now.getUTCFullYear(),
+            now.getUTCMonth() - 11,
+            1
+        ));
+
+        const rows = await Complaint.aggregate([
+            { $match: { createdAt: { $gte: start } } },
+            {
+                $group: {
+                    _id: {
+                        $dateToString: {
+                            format: "%Y-%m",
+                            date: "$createdAt",
+                            timezone: "UTC"
+                        }
+                    },
+                    count: { $sum: 1 }
+                }
+            },
+            { $sort: { _id: 1 } }
+        ]);
+
+        const counts = Object.fromEntries(rows.map(row => [row._id, row.count]));
+        const monthly = [];
+
+        for (let offset = 0; offset < 12; offset++) {
+            const date = new Date(Date.UTC(
+                start.getUTCFullYear(),
+                start.getUTCMonth() + offset,
+                1
+            ));
+            const month = date.toISOString().slice(0, 7);
+
+            monthly.push({
+                month,
+                count: counts[month] || 0
+            });
+        }
+
+        res.json({ success: true, monthly });
     } catch (error) {
         next(error);
     }
@@ -163,6 +242,7 @@ async function facultyActivity(req, res, next) {
 
 module.exports = {
     overview,
+    monthlyTrend,
     categoryDistribution,
     weekly,
     facultyActivity

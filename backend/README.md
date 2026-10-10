@@ -14,6 +14,7 @@ Node.js + Express + MongoDB backend for the CampusPulse React frontend.
 - DELETE `/api/v1/complaints/:id`
 - POST `/api/v1/complaints/check-duplicate`
 - GET `/api/v1/analytics/overview`
+- GET `/api/v1/analytics/monthly`
 - GET `/api/v1/analytics/category-distribution`
 - GET `/api/v1/analytics/weekly`
 - GET `/api/v1/analytics/faculty`
@@ -43,7 +44,7 @@ Faculty:
 `faculty@campus.edu`
 `faculty@123`
 
-The accounts are created automatically on server startup.
+The accounts are created automatically on server startup outside production. Production startup does not create demo accounts.
 
 ## Complaint request
 
@@ -65,11 +66,16 @@ Send:
 
 `Authorization: Bearer YOUR_JWT_TOKEN`
 
-For a photo, send the complaint as `multipart/form-data` and use the field name `photo`. Maximum image size is 5 MB. Uploaded files are served from `/uploads/...`.
+For a photo, send the complaint as `multipart/form-data` and use the field name `photo`. Maximum image size is 5 MB. JPEG, PNG, and WEBP uploads are decoded and validated before storage, with a 40-megapixel limit; local filenames use the detected image format. Development uploads are served from `/uploads/...`; production uploads use the returned Cloudinary HTTPS URL.
+
+In development, uploads use the local `UPLOAD_DIR` (default: `uploads`). In production, set `NODE_ENV=production` and configure `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` in the server environment. Optionally set `CLOUDINARY_FOLDER` (default: `campuspulse`). Production startup fails explicitly if Cloudinary credentials are missing; credentials should be managed through the hosting environment and never committed to `.env`.
+
+The analytics overview includes `stats.averageResolutionTimeHours` (zero when there are no resolved complaints with valid timestamps). The monthly endpoint returns the last 12 UTC calendar months, including months with zero complaints.
 
 ## ML
 
 `ML_ENABLED=false` is intentional. The backend still works without the ML service.
+ML requests use a 5-second timeout; timeouts and invalid responses leave the locally calculated complaint priority in place.
 
 When the Python model is ready:
 

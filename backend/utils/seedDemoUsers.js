@@ -3,6 +3,10 @@ const User = require("../models/User");
 
 // Add demo users if they do not exist
 async function ensureDemoUsers() {
+    if (process.env.NODE_ENV === "production") {
+        return;
+    }
+
     const users = [
         {
             name: "Campus Admin",
