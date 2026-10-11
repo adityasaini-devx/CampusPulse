@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { apiRequest } from "../api";
@@ -39,7 +38,8 @@ function Login() {
         navigate("/analytics");
       }
     } catch (err) {
-      setError(err.message || "Unable to sign in. Please try again.");
+      alert("Invalid email or password!");
+      setError("Invalid email or password. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -50,11 +50,7 @@ function Login() {
       <section className="login-visual">
         <div className="login-overlay">
           <div className="login-logo">
-            <img
-              src="/logo.png"
-              alt="CampusPulse"
-              className="brand-logo"
-            />
+            <img src="/logo.png" alt="CampusPulse" className="brand-logo" />
 
             <div>
               <strong>CampusPulse</strong>
@@ -122,11 +118,10 @@ function Login() {
               </p>
             )}
 
-            <button
-              type="submit"
-              className="primary-button"
-              disabled={loading}
-            >
+            <button type="submit" className="primary-button" disabled={loading}>
+              {loading && (
+                <span className="button-spinner" aria-hidden="true" />
+              )}
               {loading ? "Signing In..." : "Sign In →"}
             </button>
           </form>

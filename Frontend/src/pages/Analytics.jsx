@@ -1,43 +1,78 @@
-import Navbar from "../components/Navbar";
+
 import { useEffect, useState } from "react";
+import Navbar from "../components/Navbar";
 import { apiRequest } from "../api";
-import { categoryData, weeklyData, faculty } from "../data";
 
 function Analytics() {
-  const maxValue = Math.max(...weeklyData);
   const [overview, setOverview] = useState({});
   const [categories, setCategories] = useState([]);
   const [weekly, setWeekly] = useState([]);
   const [faculty, setFaculty] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
   useEffect(() => {
+    let cancelled = false;
+
     async function loadAnalytics() {
       setLoading(true);
       setError("");
 
       try {
-        const [overviewData, categoryData, weeklyData, facultyData] =
-          await Promise.all([
-            apiRequest("/analytics/overview"),
-            apiRequest("/analytics/category-distribution"),
-            apiRequest("/analytics/weekly"),
-            apiRequest("/analytics/faculty"),
-          ]);
+        const [
+          overviewData,
+          categoryData,
+          weeklyData,
+          facultyData,
+        ] = await Promise.all([
+          apiRequest("/analytics/overview"),
+          apiRequest("/analytics/category-distribution"),
+          apiRequest("/analytics/weekly"),
+          apiRequest("/analytics/faculty"),
+        ]);
+
+        if (cancelled) return;
 
         setOverview(overviewData.stats || {});
         setCategories(categoryData.categories || []);
         setWeekly(weeklyData.weekly || []);
         setFaculty(facultyData.faculty || []);
       } catch (err) {
-        setError(err.message || "Could not load analytics.");
+        if (!cancelled) {
+          setError(err.message || "Could not load analytics.");
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
 
     loadAnalytics();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  const maxWeekly = Math.max(
+    1,
+    ...weekly.map((item) => Number(item.count) || 0)
+  );
+
+  const facultyReports = faculty.reduce(
+    (total, person) => total + (Number(person.issues) || 0),
+    0
+  );
+
+  const averageHours = Number(
+    overview.averageResolutionTimeHours
+  ) || 0;
+
+  const averageResolution =
+    averageHours >= 1
+      ? `${averageHours.toFixed(1)} hrs`
+      : `${Math.round(averageHours * 60)} min`;
 
   return (
     <>
@@ -48,132 +83,204 @@ function Analytics() {
           <section className="page-heading">
             <div>
               <span className="eyebrow">FACULTY OVERVIEW</span>
-
               <h1>Campus Analytics</h1>
-
-              <p>Complaint insights across all faculty members.</p>
+              <p>
+                Insights calculated from actual campus complaints.
+              </p>
             </div>
 
             <div className="date-pill">Last 7 Days</div>
           </section>
 
-          {/* Analytics cards */}
-
-          <section className="analytics-stats">
-            <div className="card analytics-stat">
-              <span>Resolution Rate</span>
-              <strong>94.2%</strong>
-              <small>+4.8% this month</small>
+          {loading && (
+            <div className="card" role="status">
+              Loading analytics from the server...
             </div>
+          )}
 
-            <div className="card analytics-stat">
-              <span>Average Resolution</span>
-              <strong>38 min</strong>
-              <small>12 min faster</small>
+          {error && (
+            <div className="card" role="alert">
+              <h3>Unable to load analytics</h3>
+              <p>{error}</p>
+              <button
+                type="button"
+                className="primary-button"
+                onClick={() => window.location.reload()}
+              >
+                Try Again
+              </button>
             </div>
+          )}
 
-            <div className="card analytics-stat">
-              <span>Faculty Reports</span>
-              <strong>76</strong>
-              <small>Across 8 departments</small>
-            </div>
-          </section>
-
-          {/* Charts */}
-
-          <section className="analytics-grid">
-            {/* Weekly chart */}
-
-            <div className="card">
-              <div className="section-header">
-                <div>
-                  <h2>Complaints This Week</h2>
-
-                  <p>Complaints received each day.</p>
+          {!loading && !error && (
+            <>
+              {/* Live summary cards */}
+              <section className="analytics-stats">
+                <div className="card analytics-stat">
+                  <span>Total Complaints</span>
+                  <strong>{overview.total ?? 0}</strong>
+                  <small>All recorded complaints</small>
                 </div>
-              </div>
 
-              <div className="chart">
-                {weeklyData.map((value, index) => (
-                  <div className="bar-column" key={index}>
-                    <div
-                      className="bar"
-                      style={{
-                        height: `${(value / maxValue) * 100}%`,
-                      }}
-                    >
-                      <span>{value}</span>
+                <div className="card analytics-stat">
+                  <span>Resolution Rate</span>
+                  <strong>
+                    {overview.resolutionRate ?? 0}%
+                  </strong>
+                  <small>
+                    {overview.resolved ?? 0} resolved
+                  </small>
+                </div>
+
+                <div className="card analytics-stat">
+                  <span>Active Complaints</span>
+                  <strong>{overview.active ?? 0}</strong>
+                  <small>
+                    {overview.critical ?? 0} critical unresolved
+                  </small>
+                </div>
+
+                <div className="card analytics-stat">
+                  <span>Average Resolution</span>
+                  <strong>{averageResolution}</strong>
+                  <small>For resolved complaints with valid dates</small>
+                </div>
+
+                <div className="card analytics-stat">
+                  <span>Faculty Reports</span>
+                  <strong>{facultyReports}</strong>
+                  <small>Reports from listed faculty members</small>
+                </div>
+              </section>
+
+              {/* Charts */}
+              <section className="analytics-grid">
+                {/* Weekly complaint chart */}
+                <div className="card">
+                  <div className="section-header">
+                    <div>
+                      <h2>Complaints This Week</h2>
+                      <p>Actual complaints received each day.</p>
                     </div>
-
-                    <small>
-                      {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][index]}
-                    </small>
                   </div>
-                ))}
-              </div>
-            </div>
 
-            {/* Categories */}
+                  {weekly.length === 0 ? (
+                    <p>No weekly data available.</p>
+                  ) : (
+                    <div className="chart">
+                      {weekly.map((item) => {
+                        const count = Number(item.count) || 0;
 
-            <div className="card">
-              <div className="section-header">
-                <div>
-                  <h2>Complaint Categories</h2>
+                        return (
+                          <div
+                            className="bar-column"
+                            key={item.date}
+                          >
+                            <div
+                              className="bar"
+                              style={{
+                                height: `${
+                                  (count / maxWeekly) * 100
+                                }%`,
+                                minHeight: count > 0 ? "4px" : "0",
+                              }}
+                            >
+                              <span>{count}</span>
+                            </div>
 
-                  <p>Most common faculty complaints.</p>
+                            <small>{item.day}</small>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-              </div>
 
-              {categoryData.map((item) => (
-                <div className="category" key={item.name}>
+                {/* Category distribution */}
+                <div className="card">
+                  <div className="section-header">
+                    <div>
+                      <h2>Complaint Categories</h2>
+                      <p>Distribution by actual category.</p>
+                    </div>
+                  </div>
+
+                  {categories.length === 0 ? (
+                    <p>No category data available.</p>
+                  ) : (
+                    categories.map((item) => (
+                      <div
+                        className="category"
+                        key={item.name}
+                      >
+                        <div>
+                          <span>{item.name || "Other"}</span>
+                          <strong>
+                            {item.percent ?? 0}%
+                            {" "}({item.count ?? 0})
+                          </strong>
+                        </div>
+
+                        <div className="progress">
+                          <span
+                            style={{
+                              width: `${Math.min(
+                                100,
+                                Number(item.percent) || 0
+                              )}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </section>
+
+              {/* Faculty activity */}
+              <section className="card">
+                <div className="section-header">
                   <div>
-                    <span>{item.name}</span>
-
-                    <strong>{item.value}%</strong>
-                  </div>
-
-                  <div className="progress">
-                    <span
-                      style={{
-                        width: `${item.value * 2}%`,
-                      }}
-                    ></span>
+                    <h2>Faculty Activity</h2>
+                    <p>
+                      Complaint reports grouped by faculty member.
+                    </p>
                   </div>
                 </div>
-              ))}
-            </div>
-          </section>
 
-          {/* Faculty */}
+                {faculty.length === 0 ? (
+                  <p>No faculty complaint activity found.</p>
+                ) : (
+                  <div className="faculty-grid">
+                    {faculty.map((person) => (
+                      <div
+                        className="faculty-card"
+                        key={person.name}
+                      >
+                        <div className="avatar">
+                          {(person.name || "F")
+                            .charAt(0)
+                            .toUpperCase()}
+                        </div>
 
-          <section className="card">
-            <div className="section-header">
-              <div>
-                <h2>Faculty Activity</h2>
+                        <div>
+                          <strong>{person.name}</strong>
+                          <span>
+                            {person.department || "No department"}
+                          </span>
+                        </div>
 
-                <p>Complaints reported by faculty members.</p>
-              </div>
-            </div>
-
-            <div className="faculty-grid">
-              {faculty.map((person) => (
-                <div className="faculty-card" key={person.name}>
-                  <div className="avatar">{person.name.charAt(4)}</div>
-
-                  <div>
-                    <strong>{person.name}</strong>
-
-                    <span>{person.department}</span>
+                        <b>
+                          {person.issues}
+                          <small> reports</small>
+                        </b>
+                      </div>
+                    ))}
                   </div>
-
-                  <b>
-                    {person.issues}
-                    <small>reports</small>
-                  </b>
-                </div>
-              ))}
-            </div>
-          </section>
+                )}
+              </section>
+            </>
+          )}
         </div>
       </main>
     </>

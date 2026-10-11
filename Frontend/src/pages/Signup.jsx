@@ -183,6 +183,9 @@ function Signup() {
             )}
 
             <button type="submit" className="primary-button" disabled={loading}>
+              {loading && (
+                <span className="button-spinner" aria-hidden="true" />
+              )}
               {loading ? "Creating Account..." : "Create Account →"}
             </button>
           </form>

@@ -44,8 +44,6 @@ function Complaint() {
     description: "",
   });
 
-  // const [submitted, setSubmitted] = useState(false);
-
   function handleChange(event) {
     setForm({
       ...form,
@@ -97,10 +95,14 @@ function Complaint() {
   const [submitted, setSubmitted] = useState(null);
 
   <input
-  type="file"
-  accept="image/*"
-  onChange={(event) => setPhoto(event.target.files?.[0] || null)}
-/>
+    type="file"
+    accept="image/*"
+    onChange={(event) => setPhoto(event.target.files?.[0] || null)}
+  />;
+
+  {
+    photo && <small className="file-selected">Selected: {photo.name}</small>;
+  }
 
   function resetForm() {
     setForm({
@@ -329,8 +331,15 @@ function Complaint() {
                 </div>
               </div>
 
-              <button className="primary-button submit-button" type="submit">
-                Submit Complaint →
+              <button
+                className="primary-button submit-button"
+                type="submit"
+                disabled={loading}
+              >
+                {loading && (
+                  <span className="button-spinner" aria-hidden="true" />
+                )}
+                {loading ? "Submitting Complaint..." : "Submit Complaint →"}
               </button>
             </div>
 
