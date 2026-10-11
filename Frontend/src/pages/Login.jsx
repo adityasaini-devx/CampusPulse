@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { apiRequest } from "../api";
@@ -49,13 +50,16 @@ function Login() {
       <section className="login-visual">
         <div className="login-overlay">
           <div className="login-logo">
-            <div className="login-logo">
-            <img src="/logo.png" alt="CampusPulse" className="brand-logo" />
+            <img
+              src="/logo.png"
+              alt="CampusPulse"
+              className="brand-logo"
+            />
+
             <div>
-            <strong>CampusPulse</strong>
-            <span>SMART CAMPUS</span>
+              <strong>CampusPulse</strong>
+              <span>SMART CAMPUS</span>
             </div>
-          </div>
           </div>
 
           <div className="login-message">
@@ -118,7 +122,11 @@ function Login() {
               </p>
             )}
 
-            <button type="submit" className="primary-button" disabled={loading}>
+            <button
+              type="submit"
+              className="primary-button"
+              disabled={loading}
+            >
               {loading ? "Signing In..." : "Sign In →"}
             </button>
           </form>
