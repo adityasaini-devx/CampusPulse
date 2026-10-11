@@ -1343,6 +1343,7 @@ td small {
 
 .login-form-area {
   position: relative;
+
 }
 
 .signup-top-button {
@@ -1369,3 +1370,45 @@ td small {
   color: white;
   transform: translateY(-2px);
 }
+
+/* CampusPulse navbar logo */
+.navbar .logo {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+.navbar-logo-image {
+  display: block;
+  width: 220px;
+  height: 54px;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: left center;
+}
+
+/* Keep the logo correctly sized on mobile */
+@media (max-width: 700px) {
+  .navbar-logo-image {
+    width: 180px;
+    height: 46px;
+  }
+}
+
+/* Prevent the logo and menu from squeezing each other */
+.nav-container {
+  gap: 12px;
+}
+
+.nav-links {
+  flex-shrink: 0;
+}
+
+.brand-logo {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  display: block;
+}
+

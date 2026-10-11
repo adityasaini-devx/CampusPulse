@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Navbar from "../components/Navbar";
+import { apiRequest } from "../api";
 
 const categories = [
   "Electricity",
@@ -9,44 +10,97 @@ const categories = [
   "Furniture",
   "Cleaning",
   "Safety",
-  "Other"
+  "Other",
 ];
 
-const buildings = [
-  "CSIT Building",
-  "ME Block",
-  "Administrative Block"
-];
+const buildings = ["CSIT Building", "ME Block", "Administrative Block"];
 
 const severities = ["Low", "Medium", "High", "Critical"];
-const affectedUsersOptions = ["1 - 5 Users", "6 - 20 Users", "21 - 50 Users", "51 - 100 Users", "100+ Users"];
-const durationOptions = ["Less than 1 Hour", "1 to 8 Hours", "8 to 24 Hours", "1 to 3 Days", "More than 3 Days"];
+const affectedUsersOptions = [
+  "1 - 5 Users",
+  "6 - 20 Users",
+  "21 - 50 Users",
+  "51 - 100 Users",
+  "100+ Users",
+];
+const durationOptions = [
+  "Less than 1 Hour",
+  "1 to 8 Hours",
+  "8 to 24 Hours",
+  "1 to 3 Days",
+  "More than 3 Days",
+];
 
 function Complaint() {
   const [form, setForm] = useState({
-    userType: "Student",
+    title: "",
+    userType: "Teacher",
     category: "",
     building: "",
     room: "",
     severity: "",
     affectedUsers: "",
     issueDuration: "",
-    description: ""
+    description: "",
   });
 
-  const [submitted, setSubmitted] = useState(false);
+  // const [submitted, setSubmitted] = useState(false);
 
   function handleChange(event) {
     setForm({
       ...form,
-      [event.target.name]: event.target.value
+      [event.target.name]: event.target.value,
     });
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
-    setSubmitted(true);
+    setError("");
+    setLoading(true);
+
+    try {
+      const title =
+        form.title.trim() || `${form.category} issue in ${form.room}`;
+
+      let result;
+
+      if (photo) {
+        const body = new FormData();
+
+        Object.entries({ ...form, title }).forEach(([key, value]) => {
+          body.append(key, value);
+        });
+
+        body.append("photo", photo);
+
+        result = await apiRequest("/complaints", {
+          method: "POST",
+          body,
+        });
+      } else {
+        result = await apiRequest("/complaints", {
+          method: "POST",
+          body: JSON.stringify({ ...form, title }),
+        });
+      }
+
+      setSubmitted(result.complaint);
+    } catch (err) {
+      setError(err.message || "Could not submit the complaint.");
+    } finally {
+      setLoading(false);
+    }
   }
+  const [photo, setPhoto] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [submitted, setSubmitted] = useState(null);
+
+  <input
+  type="file"
+  accept="image/*"
+  onChange={(event) => setPhoto(event.target.files?.[0] || null)}
+/>
 
   function resetForm() {
     setForm({
@@ -57,7 +111,7 @@ function Complaint() {
       severity: "",
       affectedUsers: "",
       issueDuration: "",
-      description: ""
+      description: "",
     });
     setSubmitted(false);
   }
@@ -72,18 +126,14 @@ function Complaint() {
             <span className="eyebrow">SUCCESS</span>
             <h1>Complaint Submitted!</h1>
             <p>
-              Your complaint has been successfully
-              recorded for staff review.
+              Your complaint has been successfully recorded for staff review.
             </p>
             <div className="ticket">
               <span>Ticket Number</span>
               <strong>CP-1048</strong>
               <small>AI analysis started</small>
             </div>
-            <button
-              className="primary-button"
-              onClick={resetForm}
-            >
+            <button className="primary-button" onClick={resetForm}>
               Report Another Issue
             </button>
           </div>
@@ -98,21 +148,13 @@ function Complaint() {
       <main className="page">
         <div className="container">
           <section className="page-heading">
-            <span className="eyebrow">
-              CAMPUS COMPLAINTS
-            </span>
+            <span className="eyebrow">CAMPUS COMPLAINTS</span>
             <h1>Report an Issue</h1>
-            <p>
-              Tell us what needs attention.
-            </p>
+            <p>Tell us what needs attention.</p>
           </section>
 
-          <form
-            className="complaint-layout"
-            onSubmit={handleSubmit}
-          >
+          <form className="complaint-layout" onSubmit={handleSubmit}>
             <div className="card form-card">
-
               {/* User Role Toggle */}
               <div className="form-section">
                 <div className="step">01</div>
@@ -125,13 +167,9 @@ function Complaint() {
                         type="button"
                         key={role}
                         className={
-                          form.userType === role
-                            ? "choice selected"
-                            : "choice"
+                          form.userType === role ? "choice selected" : "choice"
                         }
-                        onClick={() =>
-                          setForm({ ...form, userType: role })
-                        }
+                        onClick={() => setForm({ ...form, userType: role })}
                       >
                         {role}
                       </button>
@@ -156,9 +194,7 @@ function Complaint() {
                             ? "choice selected"
                             : "choice"
                         }
-                        onClick={() =>
-                          setForm({ ...form, category: category })
-                        }
+                        onClick={() => setForm({ ...form, category: category })}
                       >
                         {category}
                       </button>
@@ -173,7 +209,7 @@ function Complaint() {
                 <div className="form-fields">
                   <h2>Where is it?</h2>
                   <p>Enter the location of the issue.</p>
-                  
+
                   <label>
                     Building
                     <select
@@ -289,17 +325,11 @@ function Complaint() {
                     <small> optional</small>
                   </h2>
                   <p>Add a photo if it helps explain the issue.</p>
-                  <input
-                    type="file"
-                    accept="image/*"
-                  />
+                  <input type="file" accept="image/*" />
                 </div>
               </div>
 
-              <button
-                className="primary-button submit-button"
-                type="submit"
-              >
+              <button className="primary-button submit-button" type="submit">
                 Submit Complaint →
               </button>
             </div>
