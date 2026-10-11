@@ -14,11 +14,14 @@ function convertAffectedUsers(value) {
         return value;
     }
 
-    const text = String(value || "").trim().toLowerCase();
+    const text = String(value || "")
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "");
 
-    if (text.includes("50+")) return 50;
-    if (text.includes("10-50")) return 30;
-    if (text.includes("6-10")) return 8;
+    if (text.includes("51-100")) return 75;
+    if (text.includes("21-50")) return 35;
+    if (text.includes("6-20")) return 13;
     if (text.includes("1-5")) return 3;
 
     const number = Number(text);
@@ -30,12 +33,17 @@ function convertDurationToHours(value) {
         return value;
     }
 
-    const text = String(value || "").trim().toLowerCase();
+    const text = String(value || "")
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "");
 
-    if (text.includes("less")) return 12;
-    if (text.includes("1-3")) return 48;
-    if (text.includes("3-7")) return 120;
-    if (text.includes("more")) return 168;
+    if (text.includes("lessthan1hour")) return 0.5;
+    if (text.includes("1-8hours") || text.includes("1to8hours")) return 4;
+    if (text.includes("8-24hours") || text.includes("8to24hours")) return 16;
+    if (text.includes("1-3days") || text.includes("1to3days")) return 48;
+    if (text.includes("3-7days") || text.includes("3to7days")) return 120;
+    if (text.includes("morethan7days")) return 168;
 
     const number = Number(text);
     return Number.isFinite(number) ? number : 0;
