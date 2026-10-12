@@ -9,13 +9,14 @@ function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function handleLogin(event) {
     event.preventDefault();
-    setError("");
 
     if (loading) return;
 
+    setError("");
     setLoading(true);
 
     try {
@@ -31,24 +32,20 @@ function Login() {
         ""
       );
 
-      // Validate the login response before saving anything.
       if (!data?.token || !data?.user?.role) {
         throw new Error(
-          "Login response is missing the token or user role."
+          "Invalid login response. Token or user role is missing."
         );
       }
 
-      // Normalize the role in case the backend returns uppercase.
       const role = String(data.user.role).trim().toLowerCase();
 
-      // Only allow roles supported by the web dashboard.
       if (!["admin", "faculty"].includes(role)) {
         throw new Error(
           "This account cannot access the web dashboard."
         );
       }
 
-      // Save the session only after validation succeeds.
       localStorage.setItem("campusToken", data.token);
       localStorage.setItem("campusRole", role);
       localStorage.setItem(
@@ -59,7 +56,6 @@ function Login() {
         })
       );
 
-      // Redirect according to the user's role.
       if (role === "admin") {
         navigate("/dashboard", { replace: true });
       } else {
@@ -67,7 +63,7 @@ function Login() {
       }
     } catch (err) {
       setError(
-        err.message || "Unable to sign in. Please try again."
+        err.message || "Login failed. Please try again."
       );
     } finally {
       setLoading(false);
@@ -78,18 +74,14 @@ function Login() {
     <main className="login-page">
       <section className="login-visual">
         <div className="login-overlay">
-          <div className="login-logo">
-            <img
-              src="/logo.png"
-              alt="CampusPulse"
-              className="brand-logo"
-            />
+          <Link to="/" className="login-logo">
+            <span className="brand-mark">C</span>
 
-            <div>
+            <span className="brand-text">
               <strong>CampusPulse</strong>
-              <span>SMART CAMPUS</span>
-            </div>
-          </div>
+              <small>SMART CAMPUS</small>
+            </span>
+          </Link>
 
           <div className="login-message">
             <span className="eyebrow">CAMPUS OPERATIONS</span>
@@ -101,98 +93,136 @@ function Login() {
             </h1>
 
             <p>
-              One simple platform for reporting, managing and
-              understanding campus maintenance.
+              One simple platform for reporting, managing, and
+              tracking campus maintenance issues.
             </p>
+
+            <div className="login-feature-list">
+              <div>
+                <span className="feature-check">✓</span>
+                Easy complaint management
+              </div>
+
+              <div>
+                <span className="feature-check">✓</span>
+                Real-time complaint tracking
+              </div>
+
+              <div>
+                <span className="feature-check">✓</span>
+                Data-driven campus insights
+              </div>
+            </div>
           </div>
+
+          <p className="login-footer-text">
+            Making campus services work better.
+          </p>
         </div>
       </section>
 
       <section className="login-form-area">
         <Link to="/signup" className="signup-top-button">
-          Sign Up
+          Create Account
         </Link>
 
         <div className="login-form">
+          <div className="login-mobile-brand">
+            <span className="brand-mark">C</span>
+            <strong>CampusPulse</strong>
+          </div>
+
           <span className="eyebrow">WELCOME BACK</span>
 
           <h2>Log in to CampusPulse</h2>
 
           <p className="muted">
-            Access your campus services.
+            Enter your account details to continue.
           </p>
 
           <form onSubmit={handleLogin}>
-            <label htmlFor="login-email">
-              Email Address
-            </label>
+            <div className="login-field">
+              <label htmlFor="login-email">
+                Email Address
+              </label>
 
-            <input
-              id="login-email"
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              autoComplete="email"
-              required
-              disabled={loading}
-            />
+              <input
+                id="login-email"
+                type="email"
+                name="email"
+                placeholder="you@campus.edu"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                autoComplete="username"
+                required
+                disabled={loading}
+              />
+            </div>
 
-            <label htmlFor="login-password">
-              Password
-            </label>
+            <div className="login-field">
+              <div className="password-label-row">
+                <label htmlFor="login-password">
+                  Password
+                </label>
+              </div>
 
-            <input
-              id="login-password"
-              type="password"
-              placeholder="Enter password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              autoComplete="current-password"
-              required
-              disabled={loading}
-            />
+              <div className="password-input-wrap">
+                <input
+                  id="login-password"
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(event) =>
+                    setPassword(event.target.value)
+                  }
+                  autoComplete="current-password"
+                  required
+                  disabled={loading}
+                />
+
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() =>
+                    setShowPassword((previous) => !previous)
+                  }
+                  aria-label={
+                    showPassword ? "Hide password" : "Show password"
+                  }
+                  disabled={loading}
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
+            </div>
 
             {error && (
-              <p className="login-error" role="alert">
-                {error}
-              </p>
+              <div className="login-error" role="alert">
+                <span aria-hidden="true">!</span>
+                <p>{error}</p>
+              </div>
             )}
 
             <button
               type="submit"
-              className="primary-button"
+              className="primary-button login-submit"
               disabled={loading}
             >
-              {loading && (
-                <span
-                  className="button-spinner"
-                  aria-hidden="true"
-                />
+              {loading ? (
+                <>
+                  <span className="button-spinner" />
+                  Signing in...
+                </>
+              ) : (
+                "Sign In →"
               )}
-
-              {loading ? "Signing In..." : "Sign In →"}
             </button>
           </form>
 
-          <div className="demo-box">
-            <strong>Demo Accounts</strong>
-
-            <p>
-              <b>Admin:</b>
-              <br />
-              admin@campus.edu
-              <br />
-              Password: admin@123
-            </p>
-
-            <p>
-              <b>Faculty:</b>
-              <br />
-              faculty@campus.edu
-              <br />
-              Password: faculty@123
-            </p>
+          <div className="login-bottom-text">
+            Need an account?{" "}
+            <Link to="/signup">Sign up</Link>
           </div>
         </div>
       </section>

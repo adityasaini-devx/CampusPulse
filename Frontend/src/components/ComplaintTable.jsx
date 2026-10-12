@@ -1,20 +1,199 @@
+import { useMemo, useState } from "react";
 
-function ComplaintTable({ complaints = [], onMarkDone, busyId }) {
-  // Format the complaint date received from the backend
-  function formatDate(date) {
-    if (!date) return "Date unavailable";
+const CLASSIFICATIONS = [
+  {
+    name: "Network & Wi-Fi",
+    department: "IT & Networking",
+    keywords: [
+      "wifi",
+      "wi-fi",
+      "internet",
+      "network",
+      "router",
+      "connection",
+      "lan",
+      "ethernet",
+      "slow internet",
+    ],
+  },
+  {
+    name: "Electricity & Power",
+    department: "Electrical",
+    keywords: [
+      "electricity",
+      "power",
+      "electric",
+      "light",
+      "lights",
+      "fan",
+      "switch",
+      "socket",
+      "voltage",
+      "outage",
+    ],
+  },
+  {
+    name: "Water Supply",
+    department: "Plumbing",
+    keywords: [
+      "water",
+      "tap",
+      "leak",
+      "leakage",
+      "pipeline",
+      "pipe",
+      "drinking water",
+      "water cooler",
+      "faucet",
+    ],
+  },
+  {
+    name: "Air Conditioning",
+    department: "HVAC & Maintenance",
+    keywords: [
+      "ac",
+      "air conditioner",
+      "air conditioning",
+      "cooling",
+      "ventilation",
+      "temperature",
+    ],
+  },
+  {
+    name: "Furniture & Classrooms",
+    department: "Facilities",
+    keywords: [
+      "chair",
+      "desk",
+      "bench",
+      "table",
+      "furniture",
+      "classroom",
+      "projector",
+      "whiteboard",
+      "blackboard",
+    ],
+  },
+  {
+    name: "Cleaning & Sanitation",
+    department: "Housekeeping",
+    keywords: [
+      "cleaning",
+      "dirty",
+      "garbage",
+      "dustbin",
+      "dust",
+      "toilet",
+      "washroom",
+      "restroom",
+      "hygiene",
+      "sanitation",
+      "smell",
+    ],
+  },
+  {
+    name: "Safety & Security",
+    department: "Security",
+    keywords: [
+      "security",
+      "unsafe",
+      "theft",
+      "safety",
+      "broken lock",
+      "camera",
+      "cctv",
+      "emergency",
+    ],
+  },
+];
 
-    const parsedDate = new Date(date);
+const normalizeText = (value = "") =>
+  String(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
-    if (Number.isNaN(parsedDate.getTime())) {
-      return "Date unavailable";
-    }
+const getComplaintText = (complaint) =>
+  normalizeText(
+    [
+      complaint.title,
+      complaint.description,
+      complaint.category,
+      complaint.location,
+      complaint.building,
+      complaint.room,
+    ]
+      .filter(Boolean)
+      .join(" ")
+  );
 
-    return parsedDate.toLocaleString();
+const getClassification = (complaint) => {
+  const category = normalizeText(complaint.category || "");
+  const text = getComplaintText(complaint);
+
+  // Prefer a recognized category from the complaint data.
+  const categoryMap = {
+    internet: "Network & Wi-Fi",
+    networking: "Network & Wi-Fi",
+    network: "Network & Wi-Fi",
+    wifi: "Network & Wi-Fi",
+    electricity: "Electricity & Power",
+    electrical: "Electricity & Power",
+    water: "Water Supply",
+    plumbing: "Water Supply",
+    ac: "Air Conditioning",
+    hvac: "Air Conditioning",
+    furniture: "Furniture & Classrooms",
+    classroom: "Furniture & Classrooms",
+    cleaning: "Cleaning & Sanitation",
+    sanitation: "Cleaning & Sanitation",
+    security: "Safety & Security",
+    safety: "Safety & Security",
+  };
+
+  const categoryMatch = CLASSIFICATIONS.find(
+    (item) => item.name === categoryMap[category]
+  );
+
+  if (categoryMatch) return categoryMatch;
+
+  // Otherwise classify using complaint title and description.
+  for (const classification of CLASSIFICATIONS) {
+    const matched = classification.keywords.some((keyword) => {
+      const normalizedKeyword = normalizeText(keyword);
+
+      return ` ${text} `.includes(` ${normalizedKeyword} `);
+    });
+
+    if (matched) return classification;
   }
 
-  // Show a message when there are no complaints
-  if (complaints.length === 0) {
+  return {
+    name: complaint.category || "Other Issues",
+    department: "General Maintenance",
+    keywords: [],
+  };
+};
+
+const getComplaintId = (complaint) =>
+  complaint._id || complaint.id || complaint.ticketId;
+
+const getComplaintPhoto = (complaint) => {
+  const photo =
+    complaint.photoUrl ||
+    complaint.imageUrl ||
+    complaint.photo ||
+    complaint.image ||
+    complaint.attachment ||
+    complaint.picture ||
+    complaint.image?.url;
+
+  if (typeof photo === "string" && photo.trim()) {
+    return photo;
+  }
+
+  if (photo && typeof photo === "object") {
     return (
       photo.url ||
       photo.secure_url ||
