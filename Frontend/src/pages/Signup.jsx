@@ -71,7 +71,11 @@ function Signup() {
       <section className="login-visual">
         <div className="login-overlay">
           <div className="login-logo">
-            <div className="logo-icon">CP</div>
+            <img
+              src="/logo.png"
+              alt="CampusPulse logo"
+              className="auth-logo-image"
+            />
 
             <div>
               <strong>CampusPulse</strong>
