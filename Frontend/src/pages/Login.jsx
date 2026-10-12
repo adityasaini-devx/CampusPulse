@@ -29,21 +29,19 @@ function Login() {
             password,
           }),
         },
-        ""
+        "",
       );
 
       if (!data?.token || !data?.user?.role) {
         throw new Error(
-          "Invalid login response. Token or user role is missing."
+          "Invalid login response. Token or user role is missing.",
         );
       }
 
       const role = String(data.user.role).trim().toLowerCase();
 
       if (!["admin", "faculty"].includes(role)) {
-        throw new Error(
-          "This account cannot access the web dashboard."
-        );
+        throw new Error("This account cannot access the web dashboard.");
       }
 
       localStorage.setItem("campusToken", data.token);
@@ -53,7 +51,7 @@ function Login() {
         JSON.stringify({
           ...data.user,
           role,
-        })
+        }),
       );
 
       if (role === "admin") {
@@ -62,9 +60,7 @@ function Login() {
         navigate("/analytics", { replace: true });
       }
     } catch (err) {
-      setError(
-        err.message || "Login failed. Please try again."
-      );
+      setError(err.message || "Login failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -75,7 +71,11 @@ function Login() {
       <section className="login-visual">
         <div className="login-overlay">
           <Link to="/" className="login-logo">
-            <span className="brand-mark">C</span>
+            <img
+              src="/logo.png"
+              alt="CampusPulse logo"
+              className="auth-logo-image"
+            />
 
             <span className="brand-text">
               <strong>CampusPulse</strong>
@@ -93,8 +93,8 @@ function Login() {
             </h1>
 
             <p>
-              One simple platform for reporting, managing, and
-              tracking campus maintenance issues.
+              One simple platform for reporting, managing, and tracking campus
+              maintenance issues.
             </p>
 
             <div className="login-feature-list">
@@ -136,15 +136,11 @@ function Login() {
 
           <h2>Log in to CampusPulse</h2>
 
-          <p className="muted">
-            Enter your account details to continue.
-          </p>
+          <p className="muted">Enter your account details to continue.</p>
 
           <form onSubmit={handleLogin}>
             <div className="login-field">
-              <label htmlFor="login-email">
-                Email Address
-              </label>
+              <label htmlFor="login-email">Email Address</label>
 
               <input
                 id="login-email"
@@ -161,9 +157,7 @@ function Login() {
 
             <div className="login-field">
               <div className="password-label-row">
-                <label htmlFor="login-password">
-                  Password
-                </label>
+                <label htmlFor="login-password">Password</label>
               </div>
 
               <div className="password-input-wrap">
@@ -173,9 +167,7 @@ function Login() {
                   name="password"
                   placeholder="Enter your password"
                   value={password}
-                  onChange={(event) =>
-                    setPassword(event.target.value)
-                  }
+                  onChange={(event) => setPassword(event.target.value)}
                   autoComplete="current-password"
                   required
                   disabled={loading}
@@ -184,12 +176,8 @@ function Login() {
                 <button
                   type="button"
                   className="password-toggle"
-                  onClick={() =>
-                    setShowPassword((previous) => !previous)
-                  }
-                  aria-label={
-                    showPassword ? "Hide password" : "Show password"
-                  }
+                  onClick={() => setShowPassword((previous) => !previous)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                   disabled={loading}
                 >
                   {showPassword ? "Hide" : "Show"}
@@ -221,8 +209,7 @@ function Login() {
           </form>
 
           <div className="login-bottom-text">
-            Need an account?{" "}
-            <Link to="/signup">Sign up</Link>
+            Need an account? <Link to="/signup">Sign up</Link>
           </div>
         </div>
       </section>
