@@ -13,6 +13,9 @@ function Login() {
   async function handleLogin(event) {
     event.preventDefault();
     setError("");
+
+    if (loading) return;
+
     setLoading(true);
 
     try {
@@ -25,21 +28,47 @@ function Login() {
             password,
           }),
         },
-        "",
+        ""
       );
 
-      localStorage.setItem("campusToken", data.token);
-      localStorage.setItem("campusRole", data.user.role);
-      localStorage.setItem("campusUser", JSON.stringify(data.user));
+      // Validate the login response before saving anything.
+      if (!data?.token || !data?.user?.role) {
+        throw new Error(
+          "Login response is missing the token or user role."
+        );
+      }
 
-      if (data.user.role === "admin") {
-        navigate("/dashboard");
-      } else if (data.user.role === "faculty") {
-        navigate("/analytics");
+      // Normalize the role in case the backend returns uppercase.
+      const role = String(data.user.role).trim().toLowerCase();
+
+      // Only allow roles supported by the web dashboard.
+      if (!["admin", "faculty"].includes(role)) {
+        throw new Error(
+          "This account cannot access the web dashboard."
+        );
+      }
+
+      // Save the session only after validation succeeds.
+      localStorage.setItem("campusToken", data.token);
+      localStorage.setItem("campusRole", role);
+      localStorage.setItem(
+        "campusUser",
+        JSON.stringify({
+          ...data.user,
+          role,
+        })
+      );
+
+      // Redirect according to the user's role.
+      if (role === "admin") {
+        navigate("/dashboard", { replace: true });
+      } else {
+        navigate("/analytics", { replace: true });
       }
     } catch (err) {
-      alert("Invalid email or password!");
-      setError("Invalid email or password. Please try again.");
+      setError(
+        err.message || "Unable to sign in. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -50,7 +79,11 @@ function Login() {
       <section className="login-visual">
         <div className="login-overlay">
           <div className="login-logo">
-            <img src="/logo.png" alt="CampusPulse" className="brand-logo" />
+            <img
+              src="/logo.png"
+              alt="CampusPulse"
+              className="brand-logo"
+            />
 
             <div>
               <strong>CampusPulse</strong>
@@ -68,8 +101,8 @@ function Login() {
             </h1>
 
             <p>
-              One simple platform for reporting, managing and understanding
-              campus maintenance.
+              One simple platform for reporting, managing and
+              understanding campus maintenance.
             </p>
           </div>
         </div>
@@ -83,12 +116,16 @@ function Login() {
         <div className="login-form">
           <span className="eyebrow">WELCOME BACK</span>
 
-          <h2>Login in to CampusPulse</h2>
+          <h2>Log in to CampusPulse</h2>
 
-          <p className="muted">Access your campus services.</p>
+          <p className="muted">
+            Access your campus services.
+          </p>
 
           <form onSubmit={handleLogin}>
-            <label htmlFor="login-email">Email Address</label>
+            <label htmlFor="login-email">
+              Email Address
+            </label>
 
             <input
               id="login-email"
@@ -98,9 +135,12 @@ function Login() {
               onChange={(event) => setEmail(event.target.value)}
               autoComplete="email"
               required
+              disabled={loading}
             />
 
-            <label htmlFor="login-password">Password</label>
+            <label htmlFor="login-password">
+              Password
+            </label>
 
             <input
               id="login-password"
@@ -110,6 +150,7 @@ function Login() {
               onChange={(event) => setPassword(event.target.value)}
               autoComplete="current-password"
               required
+              disabled={loading}
             />
 
             {error && (
@@ -118,10 +159,18 @@ function Login() {
               </p>
             )}
 
-            <button type="submit" className="primary-button" disabled={loading}>
+            <button
+              type="submit"
+              className="primary-button"
+              disabled={loading}
+            >
               {loading && (
-                <span className="button-spinner" aria-hidden="true" />
+                <span
+                  className="button-spinner"
+                  aria-hidden="true"
+                />
               )}
+
               {loading ? "Signing In..." : "Sign In →"}
             </button>
           </form>

@@ -1,108 +1,308 @@
-# 🚀 CampusPulse
+﻿# CampusPulse
 
-## Smart Campus Maintenance & Issue Intelligence Platform
+### Smart Campus Maintenance & ML-Assisted Issue Intelligence
 
-CampusPulse is an **ML-powered campus maintenance and issue intelligence platform** designed to transform traditional complaint management into an intelligent decision-support system.
+CampusPulse is a full-stack campus maintenance and complaint management platform. It allows users to report infrastructure issues, track complaint status, and analyze maintenance activity. Its optional Machine Learning service adds priority prediction, complaint clustering, historical pattern analysis, and maintenance decision-support scores.
 
-Instead of simply storing and forwarding complaints, CampusPulse uses **Machine Learning, Clustering, and Ensemble Learning** to:
+- **Live application:** https://campus-pulse-five-alpha.vercel.app
+- **Repository:** https://github.com/adityasaini-devx/CampusPulse
+- **Default branch:** `main`
+### Machine Learning Contributions
 
-- Predict complaint priority
-- Identify similar complaints
-- Detect recurring campus issues
-- Analyze complaint patterns
-- Prioritize maintenance requests
-- Help administrators make faster and more informed decisions
+- **Priority Prediction:** Predicts complaint priority levels to help prioritize issues.
+- **Ensemble Learning:** Compares multiple machine learning models for complaint classification.
+- **Maintenance Intelligence:** Identifies recurring complaints and helps support maintenance planning.
 
----
+## Features
 
-## 🎯 Problem Statement
+- **Complaint Management:** Submit, view, update, and track maintenance complaints.
+- **Role-Based Access:** Separate admin and faculty experiences with protected routes.
+- **Authentication:** JWT-based authentication and password hashing.
+- **Priority Management:** Organize complaints into Low, Medium, High, and Critical priorities.
+- **Image Uploads:** Attach complaint photos with local development storage and Cloudinary production storage.
+- **Admin Dashboard:** Review complaints, manage their status, and access user information.
+- **Analytics:** View complaint statistics, monthly trends, weekly activity, category distributions, and faculty activity.
+- **ML-Assisted Intelligence:** Optionally predict complaint priority, identify complaint patterns, analyze historical recurrence, and calculate a maintenance score.
+- **Dataset Import:** Import complaint records using the backend CSV import utility.
 
-In a traditional campus complaint system, complaints are usually recorded and forwarded manually. This makes it difficult to determine:
+## System Architecture
 
-- Which complaints require immediate attention
-- Whether multiple complaints describe the same issue
-- Which problems are recurring
-- How many users are affected by an issue
-- Which maintenance requests should be handled first
+```text
+                 React + Vite Frontend
+                          |
+                    HTTP / JSON
+                    JWT Authentication
+                          |
+                          v
+                Node.js + Express API
+                    /           \
+                   v             v
+              MongoDB       FastAPI ML Service
+                                  |
+                       +----------+----------+
+                       |          |          |
+                       v          v          v
+                   Priority    K-Means    Historical
+                  Prediction  Clustering    Analysis
+                       \          |          /
+                        Maintenance Intelligence
+```
 
-CampusPulse addresses these problems by adding an **ML-assisted intelligence layer** to the complaint management process.
+The frontend communicates with the Express backend. MongoDB stores application data, while the Python service provides additional ML functionality when enabled.
 
-For example, multiple complaints about **Wi-Fi failure in the same laboratory** can be recognized as a common issue pattern. Similarly, an issue affecting a large number of users with high severity can automatically receive a higher priority.
+**Important:** The backend currently has `ML_ENABLED=false` by default. Complaint management can operate without ML predictions. Enable the integration only after verifying that the Python service is running correctly.
 
----
+## Technology Stack
 
-# ✨ Key Features
+| Component | Technologies |
+|---|---|
+| Frontend | React 19, Vite, React Router, JavaScript, CSS |
+| Backend | Node.js, Express 5 |
+| Database | MongoDB, Mongoose |
+| Authentication | JSON Web Tokens, bcryptjs |
+| Security | Helmet, CORS, express-rate-limit |
+| Image Processing | Multer, Sharp, Cloudinary |
+| Machine Learning | Python, Pandas, NumPy, scikit-learn, XGBoost, Joblib |
+| ML API | FastAPI, Pydantic, Uvicorn |
+| Deployment | Vercel frontend configuration, Docker support for ML |
 
-### 📝 Complaint Submission
+## Repository Structure
 
-Students and faculty can report campus maintenance issues such as:
+```text
+CampusPulse/
+Γö£ΓöÇΓöÇ Frontend/
+Γöé   Γö£ΓöÇΓöÇ public/
+Γöé   ΓööΓöÇΓöÇ src/
+Γöé       Γö£ΓöÇΓöÇ components/
+Γöé       Γöé   Γö£ΓöÇΓöÇ ComplaintTable.jsx
+Γöé       Γöé   Γö£ΓöÇΓöÇ Navbar.jsx
+Γöé       Γöé   ΓööΓöÇΓöÇ StatCard.jsx
+Γöé       Γö£ΓöÇΓöÇ pages/
+Γöé       Γöé   Γö£ΓöÇΓöÇ Analytics.jsx
+Γöé       Γöé   Γö£ΓöÇΓöÇ Complaint.jsx
+Γöé       Γöé   Γö£ΓöÇΓöÇ Dashboard.jsx
+Γöé       Γöé   Γö£ΓöÇΓöÇ Login.jsx
+Γöé       Γöé   ΓööΓöÇΓöÇ Signup.jsx
+Γöé       Γö£ΓöÇΓöÇ api.js
+Γöé       Γö£ΓöÇΓöÇ App.jsx
+Γöé       Γö£ΓöÇΓöÇ main.jsx
+Γöé       ΓööΓöÇΓöÇ style.css
+Γöé
+Γö£ΓöÇΓöÇ backend/
+Γöé   Γö£ΓöÇΓöÇ config/
+Γöé   Γö£ΓöÇΓöÇ controllers/
+Γöé   Γö£ΓöÇΓöÇ middleware/
+Γöé   Γö£ΓöÇΓöÇ models/
+Γöé   Γö£ΓöÇΓöÇ routes/
+Γöé   Γö£ΓöÇΓöÇ scripts/
+Γöé   Γö£ΓöÇΓöÇ services/
+Γöé   Γöé   ΓööΓöÇΓöÇ mlService.js
+Γöé   Γö£ΓöÇΓöÇ utils/
+Γöé   Γö£ΓöÇΓöÇ .env.example
+Γöé   Γö£ΓöÇΓöÇ index.js
+Γöé   ΓööΓöÇΓöÇ package.json
+Γöé
+Γö£ΓöÇΓöÇ ML-MODEL/
+Γöé   Γö£ΓöÇΓöÇ api/
+Γöé   Γöé   Γö£ΓöÇΓöÇ main.py
+Γöé   Γöé   ΓööΓöÇΓöÇ schemas.py
+Γöé   Γö£ΓöÇΓöÇ data/
+Γöé   Γöé   Γö£ΓöÇΓöÇ raw/
+Γöé   Γöé   Γö£ΓöÇΓöÇ eda/
+Γöé   Γöé   ΓööΓöÇΓöÇ processed/
+Γöé   Γö£ΓöÇΓöÇ ml/models/
+Γöé   Γöé   Γö£ΓöÇΓöÇ classification/
+Γöé   Γöé   ΓööΓöÇΓöÇ clustering/
+Γöé   Γö£ΓöÇΓöÇ notebooks/
+Γöé   Γö£ΓöÇΓöÇ Ensemble_Learning/
+Γöé   Γö£ΓöÇΓöÇ experiments/
+Γöé   Γö£ΓöÇΓöÇ requirements.txt
+Γöé   ΓööΓöÇΓöÇ Dockerfile
+Γöé
+ΓööΓöÇΓöÇ README.md
+```
 
-- Wi-Fi failures
-- Projector malfunctions
-- AC issues
-- Laboratory PC problems
-- Electrical faults
-- Classroom equipment failures
+## Getting Started
 
-### 🤖 Priority Prediction
+### Prerequisites
 
-CampusPulse predicts the priority of a complaint into four categories:
+- Node.js 20.9 or newer
+- npm
+- Python 3.11 for the ML service
+- MongoDB locally or through MongoDB Atlas
+- Git
 
-- 🟢 Low
-- 🟡 Medium
-- 🟠 High
-- 🔴 Critical
+### 1. Start the backend
 
-### 🔎 Similar Complaint Detection
+From the repository root:
 
-The system identifies complaints that are similar to each other and helps administrators understand whether multiple complaints are related to the same underlying problem.
+```powershell
+cd backend
+npm install
+Copy-Item .env.example .env
+```
 
-### 🔄 Recurring Issue Detection
+Configure `backend/.env` with a valid MongoDB connection string and a strong JWT secret.
 
-Historical complaint patterns are analyzed to identify issues that repeatedly occur in specific locations or categories.
+```dotenv
+PORT=4000
+MONGODB_URL=mongodb://127.0.0.1:27017/campuspulse
+JWT_SECRET=replace_with_a_strong_secret
+JWT_EXPIRES_IN=7d
+CLIENT_URL=http://localhost:5173
+ML_ENABLED=false
+ML_SERVICE_URL=http://localhost:8000
+```
 
-### 📊 ML Model Comparison
+Keep the remaining upload and Cloudinary settings from `.env.example` as appropriate for your environment.
 
-Multiple classification algorithms are trained and evaluated:
+Start the server:
 
-- Logistic Regression
-- Decision Tree
-- Random Forest
-- XGBoost / Gradient Boosting
+```powershell
+npm run dev
+```
 
-### 🧩 Ensemble Learning
+The backend normally runs at `http://localhost:4000`.
 
-Different models are combined using:
+### 2. Start the frontend
 
-- Hard Voting
-- Soft Voting
-- Bagging
-- Boosting
+Open another terminal:
 
-The performance of ensemble models is compared with individual classifiers.
+```powershell
+cd Frontend
+npm install
+```
 
-### 📈 Maintenance Intelligence
+Create `Frontend/.env`:
 
-The system combines ML outputs into actionable indicators such as:
+```dotenv
+VITE_API_BASE_URL=http://localhost:4000/api/v1
+```
 
-- Predicted priority
-- Number of similar complaints
-- Recurring issue status
-- Number of affected users
-- Complaint patterns
+Start Vite:
 
-### 🖥️ Admin Dashboard
+```powershell
+npm run dev
+```
 
-Administrators can:
+Open the local URL displayed in your terminal, normally `http://localhost:5173`.
 
-- View complaints
-- Analyze issue patterns
-- Prioritize complaints
-- Assign / forward complaints
-- Track resolutions
-- Monitor maintenance issues
+Ensure that the backend's `CLIENT_URL` matches the frontend origin.
 
----
-# Frontend and UI Approach
-As the frontend developer and UI designer, I created the visual and interactive bridge between the complex machine learning backend and our diverse end-users.
-Utilizing Google Stitch for UI design alongside HTML, CSS, and JavaScript/React for frontend development. 
+### 3. Start the ML service (optional)
+
+Open a third terminal:
+
+```powershell
+cd ML-MODEL
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+uvicorn api.main:app --host 0.0.0.0 --port 8000
+```
+
+Verify the service at `http://localhost:8000/health`.
+
+After confirming that the model artifacts and historical dataset load correctly, update the backend environment:
+
+```dotenv
+ML_ENABLED=true
+ML_SERVICE_URL=http://localhost:8000
+```
+
+Restart the backend after changing environment variables.
+
+## Application Workflow
+
+1. The user signs in through the React frontend.
+2. The frontend sends requests to the Express API and includes the JWT for protected endpoints.
+3. The backend validates requests and interacts with MongoDB.
+4. When a complaint is submitted, the backend stores complaint information and calculates a local priority.
+5. If ML integration is enabled, the backend sends the complaint to FastAPI for additional analysis.
+6. The ML service uses saved preprocessing and classification artifacts, clustering parameters, and historical complaint data.
+7. The backend incorporates the ML result when successful, while retaining its local priority fallback when ML is unavailable.
+8. The frontend displays complaint records, dashboard statistics, and analytics.
+
+## API Reference
+
+The backend API base path is `/api/v1`.
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/api/v1/health` | Backend health check |
+| POST | `/api/v1/auth/login` | Authenticate a user |
+| POST | `/api/v1/auth/register` | Register a user |
+| POST | `/api/v1/auth/signup` | Faculty signup |
+| GET | `/api/v1/auth/me` | Retrieve the current user |
+| POST | `/api/v1/complaints` | Submit a complaint |
+| GET | `/api/v1/complaints` | List complaints |
+| GET | `/api/v1/complaints/:id` | Retrieve a complaint |
+| PATCH | `/api/v1/complaints/:id` | Update a complaint |
+| DELETE | `/api/v1/complaints/:id` | Delete a complaint; admin only |
+| GET/POST | `/api/v1/complaints/check-duplicate` | Check for potential duplicates |
+| GET | `/api/v1/analytics/overview` | Summary statistics |
+| GET | `/api/v1/analytics/monthly` | Monthly trends |
+| GET | `/api/v1/analytics/category-distribution` | Category breakdown |
+| GET | `/api/v1/analytics/weekly` | Weekly complaint activity |
+| GET | `/api/v1/analytics/faculty` | Faculty activity |
+| GET | `/api/v1/users` | List users; admin only |
+
+Protected requests use:
+
+```http
+Authorization: Bearer <JWT>
+```
+
+The ML service exposes `/health`, `/predict-priority`, `/cluster-complaint`, `/maintenance-intelligence`, and `/complaints`.
+
+For request schemas and detailed endpoint behavior, see `backend/README.md` and `ML-MODEL/README.md`.
+
+## Machine Learning Pipeline
+
+The ML module separates model experimentation from inference.
+
+1. **Data cleaning:** Prepare complaint data for analysis.
+2. **Exploratory analysis:** Examine distributions, categories, and complaint patterns.
+3. **Preprocessing:** Transform categorical and numerical features and apply the saved PCA transformation where configured.
+4. **Classification:** Compare Logistic Regression, Decision Tree, Random Forest, and XGBoost.
+5. **Ensemble learning:** Evaluate voting and bagging approaches.
+6. **Clustering:** Assign complaints to groups using the saved K-Means artifact.
+7. **Historical analysis:** Use complaint history to estimate similarity and recurrence signals.
+8. **Maintenance intelligence:** Combine priority, recurrence, pattern, and impact signals into a decision-support score.
+9. **Inference:** Serve results through FastAPI.
+
+The current API loads `ML-MODEL/ml/models/classification/priority_pipeline.pkl` and the K-Means artifact in `ML-MODEL/ml/models/clustering/kmeans_model.json`.
+
+The ML module's documentation identifies Logistic Regression with PCA as the active classification pipeline. XGBoost and other algorithms are evaluated in notebooks; their experimental results should not be confused with the model currently loaded for API inference.
+
+The maintenance score is a decision-support metric, not a calibrated probability of failure or resolution.
+
+## Deployment
+
+### Frontend
+The `Frontend/` directory contains Vercel configuration. Configure `VITE_API_BASE_URL` in the deployment environment to point to the intended backend.
+
+### Backend
+Deploy `backend/` with Node.js 20.9+, a reachable MongoDB database, and the required environment variables. Configure `CLIENT_URL` for the deployed frontend origin.
+
+### ML service
+Deploy `ML-MODEL/` using its Dockerfile or run FastAPI with Uvicorn. Ensure the saved models and processed historical dataset are available in the deployment.
+
+If ML is enabled, configure `ML_SERVICE_URL` to point to the deployed ML service.
+
+A deployment is fully integrated only when the frontend API URL, backend CORS settings, database connection, and optional ML service URL are configured correctly.
+
+## Troubleshooting
+
+- **Frontend cannot connect:** Check `VITE_API_BASE_URL`, backend availability, and CORS configuration.
+- **Backend fails to start:** Verify `MONGODB_URL` and database connectivity.
+- **ML service fails to start:** Check the saved model files, processed CSV, Python dependencies, and scikit-learn compatibility.
+- **ML results are missing:** Verify `ML_ENABLED=true`, `ML_SERVICE_URL`, and service logs.
+- **Production uploads fail:** Configure the required Cloudinary credentials.
+- **Large datasets or repository size:** Consider Git LFS or external artifact storage for large data and model files.
+
+## Further Documentation
+
+- [Backend documentation](backend/README.md)
+- [ML module documentation](ML-MODEL/README.md)
