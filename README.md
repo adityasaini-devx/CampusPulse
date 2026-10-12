@@ -1,12 +1,17 @@
-# CampusPulse
+﻿# CampusPulse
 
 ### Smart Campus Maintenance & ML-Assisted Issue Intelligence
 
 CampusPulse is a full-stack campus maintenance and complaint management platform. It allows users to report infrastructure issues, track complaint status, and analyze maintenance activity. Its optional Machine Learning service adds priority prediction, complaint clustering, historical pattern analysis, and maintenance decision-support scores.
 
-- **Live application:** https://campus-pulse-1.vercel.app/login
+- **Live application:** https://campus-pulse-five-alpha.vercel.app
 - **Repository:** https://github.com/adityasaini-devx/CampusPulse
 - **Default branch:** `main`
+### Machine Learning Contributions
+
+- **Priority Prediction:** Predicts complaint priority levels to help prioritize issues.
+- **Ensemble Learning:** Compares multiple machine learning models for complaint classification.
+- **Maintenance Intelligence:** Identifies recurring complaints and helps support maintenance planning.
 
 ## Features
 
@@ -65,56 +70,56 @@ The frontend communicates with the Express backend. MongoDB stores application d
 
 ```text
 CampusPulse/
-├── Frontend/
-│   ├── public/
-│   └── src/
-│       ├── components/
-│       │   ├── ComplaintTable.jsx
-│       │   ├── Navbar.jsx
-│       │   └── StatCard.jsx
-│       ├── pages/
-│       │   ├── Analytics.jsx
-│       │   ├── Complaint.jsx
-│       │   ├── Dashboard.jsx
-│       │   ├── Login.jsx
-│       │   └── Signup.jsx
-│       ├── api.js
-│       ├── App.jsx
-│       ├── main.jsx
-│       └── style.css
-│
-├── backend/
-│   ├── config/
-│   ├── controllers/
-│   ├── middleware/
-│   ├── models/
-│   ├── routes/
-│   ├── scripts/
-│   ├── services/
-│   │   └── mlService.js
-│   ├── utils/
-│   ├── .env.example
-│   ├── index.js
-│   └── package.json
-│
-├── ML-MODEL/
-│   ├── api/
-│   │   ├── main.py
-│   │   └── schemas.py
-│   ├── data/
-│   │   ├── raw/
-│   │   ├── eda/
-│   │   └── processed/
-│   ├── ml/models/
-│   │   ├── classification/
-│   │   └── clustering/
-│   ├── notebooks/
-│   ├── Ensemble_Learning/
-│   ├── experiments/
-│   ├── requirements.txt
-│   └── Dockerfile
-│
-└── README.md
+Γö£ΓöÇΓöÇ Frontend/
+Γöé   Γö£ΓöÇΓöÇ public/
+Γöé   ΓööΓöÇΓöÇ src/
+Γöé       Γö£ΓöÇΓöÇ components/
+Γöé       Γöé   Γö£ΓöÇΓöÇ ComplaintTable.jsx
+Γöé       Γöé   Γö£ΓöÇΓöÇ Navbar.jsx
+Γöé       Γöé   ΓööΓöÇΓöÇ StatCard.jsx
+Γöé       Γö£ΓöÇΓöÇ pages/
+Γöé       Γöé   Γö£ΓöÇΓöÇ Analytics.jsx
+Γöé       Γöé   Γö£ΓöÇΓöÇ Complaint.jsx
+Γöé       Γöé   Γö£ΓöÇΓöÇ Dashboard.jsx
+Γöé       Γöé   Γö£ΓöÇΓöÇ Login.jsx
+Γöé       Γöé   ΓööΓöÇΓöÇ Signup.jsx
+Γöé       Γö£ΓöÇΓöÇ api.js
+Γöé       Γö£ΓöÇΓöÇ App.jsx
+Γöé       Γö£ΓöÇΓöÇ main.jsx
+Γöé       ΓööΓöÇΓöÇ style.css
+Γöé
+Γö£ΓöÇΓöÇ backend/
+Γöé   Γö£ΓöÇΓöÇ config/
+Γöé   Γö£ΓöÇΓöÇ controllers/
+Γöé   Γö£ΓöÇΓöÇ middleware/
+Γöé   Γö£ΓöÇΓöÇ models/
+Γöé   Γö£ΓöÇΓöÇ routes/
+Γöé   Γö£ΓöÇΓöÇ scripts/
+Γöé   Γö£ΓöÇΓöÇ services/
+Γöé   Γöé   ΓööΓöÇΓöÇ mlService.js
+Γöé   Γö£ΓöÇΓöÇ utils/
+Γöé   Γö£ΓöÇΓöÇ .env.example
+Γöé   Γö£ΓöÇΓöÇ index.js
+Γöé   ΓööΓöÇΓöÇ package.json
+Γöé
+Γö£ΓöÇΓöÇ ML-MODEL/
+Γöé   Γö£ΓöÇΓöÇ api/
+Γöé   Γöé   Γö£ΓöÇΓöÇ main.py
+Γöé   Γöé   ΓööΓöÇΓöÇ schemas.py
+Γöé   Γö£ΓöÇΓöÇ data/
+Γöé   Γöé   Γö£ΓöÇΓöÇ raw/
+Γöé   Γöé   Γö£ΓöÇΓöÇ eda/
+Γöé   Γöé   ΓööΓöÇΓöÇ processed/
+Γöé   Γö£ΓöÇΓöÇ ml/models/
+Γöé   Γöé   Γö£ΓöÇΓöÇ classification/
+Γöé   Γöé   ΓööΓöÇΓöÇ clustering/
+Γöé   Γö£ΓöÇΓöÇ notebooks/
+Γöé   Γö£ΓöÇΓöÇ Ensemble_Learning/
+Γöé   Γö£ΓöÇΓöÇ experiments/
+Γöé   Γö£ΓöÇΓöÇ requirements.txt
+Γöé   ΓööΓöÇΓöÇ Dockerfile
+Γöé
+ΓööΓöÇΓöÇ README.md
 ```
 
 ## Getting Started
@@ -296,14 +301,6 @@ A deployment is fully integrated only when the frontend API URL, backend CORS se
 - **ML results are missing:** Verify `ML_ENABLED=true`, `ML_SERVICE_URL`, and service logs.
 - **Production uploads fail:** Configure the required Cloudinary credentials.
 - **Large datasets or repository size:** Consider Git LFS or external artifact storage for large data and model files.
-
-## Security
-
-- Replace example secrets with strong production secrets.
-- Never commit `.env` files or production credentials.
-- Restrict CORS to trusted origins.
-- Do not use predictable demo credentials in production.
-- Load serialized model artifacts only from trusted sources.
 
 ## Further Documentation
 
